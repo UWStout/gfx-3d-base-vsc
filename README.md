@@ -1,4 +1,4 @@
-# UW Stout CS 343 2D Project Base
+# UW Stout CS 343 3D Project Base
 #### A codebase for building the projects assigned in CS 343, Mathematical Foundations of Computer Graphics, at the University of Wisconsin Stout.
 
 ## Features
@@ -17,7 +17,7 @@ The basic steps for utilizing this repository:
 Navigate into your workspace directory and clone the repo with git:
 
 ```
-git clone https://github.com/lean/phaser-es6-webpack.git .
+git clone https://github.com/UWStout/gfx-3d-base-vsc.git .
 ```
 
 Switch to the tag that matches the project you want to work on:
@@ -26,7 +26,7 @@ Switch to the tag that matches the project you want to work on:
 git checkout <tagname>
 ```
 
-See the [github website](https://github.com/UWStout/gfx-2d-base/tags) for lists of accepted tagnames.
+See the [github website](https://github.com/UWStout/gfx-3d-base-vsc/tags) for lists of accepted tagnames.
 
 ## 2. Install node.js and npm:
 
@@ -52,7 +52,7 @@ Note, yarn is also supported.
 # Working on the Code
 
 While working on the project, you should first run the development server.  Change to
-the code repo directory and run:
+the code repo directory (or use the VS Code terminal) and run:
 
 ```
 npm run dev
@@ -63,7 +63,7 @@ also run a local web server on port 3000. Lastly, it opens 'localhost:3000' in y
 default web browser.
 
 You can open and edit the files in the project base in your favorite text/code editor
-(Atom is recommended) and the changes will be automatically reflected in the browser.
+(VisualStudio Code is recommended) and the changes will be automatically reflected in the browser.
 If you accidentally close the browser or if you want to open it in a different browser
 or have multiple versions open at once, just type 'localhost:3000' into the browser
 address bar to talk to the local server.
@@ -79,17 +79,24 @@ there are some changes that will cause the browser to get out of sync:
 * If you make changes to HTML or CSS code it will NOT automatically refresh, only JS code.
 * If the 'dev' server is not running (e.g. you forgot to run 'npm run dev') it will not refresh.
 
-## Build for deployment:
+## Build for production/deployment:
 
-When you project is done and you want to build the FINAL version you would give to normal users
-then change to the directory of the repo and run:
+When you project is done and you want to build the FINAL version you would give to normal users, you can build the production or deployment versions. First, to build the production version, adjust your 'run' command to be:
+
+```
+npm run prod
+```
+
+This builds the 'dist/bundle.js' file differently so that its size is minimized and the code is
+further optimized. It also sets the global JS variable `__DEV__` to be false.
+
+The prod script will still run the local dev server so you can test to make sure everything still works. Once you are sure, you can then run the deploy script:
 
 ```
 npm run deploy
 ```
 
-This builds the 'dist/bundle.js' file differently so that its size is minimized and the code is
-further optimized. This is not required for your class submissions but you should know it exists.
+This is configured identical to the prod script but it does not run the local browsersync server. It is a good idea to clear everything out of the 'dist' folder before you do this.
 
 ## Credits
 This code base was largely inspired by:
