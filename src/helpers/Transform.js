@@ -40,7 +40,7 @@ class Transform {
   }
 
   /**
-   * TODO: Remember to keep in mind DEGREES vs RADIANS
+   * NOTE: Remember to keep in mind DEGREES vs RADIANS
    * Return the values for the rotation angles of this transformation
    * @return {THREE.Vector3} Vector that holds the rotation angles in RADIANS
    **/

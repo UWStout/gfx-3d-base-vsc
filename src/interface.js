@@ -21,6 +21,19 @@ import ObjLoader from './objects/ObjLoader'
 
 let Interface = {
   initialize: () => {
+    // Initialize the tree widget
+    $('#meshListTree').tree({
+      data: [], autoOpen: 0
+    })
+
+    $('#meshListTree').bind('tree.select', (event) => {
+      if (event.node) {
+        updateSelectedMesh(event.node.meshObj)
+      } else {
+        updateSelectedMesh()
+      }
+    })
+
     // The following file-input code (and the corresponding HTML) comes from:
     // https://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3
 
@@ -44,20 +57,6 @@ let Interface = {
       }
     })
     // End borrowed file-input code
-
-    // Initialize the tree widget
-    let meshTree = $('#meshListTree')
-    meshTree.tree({
-      data: [], autoOpen: 0
-    })
-
-    meshTree.bind('tree.select', (event) => {
-      if (event.node) {
-        updateSelectedMesh(event.node.meshObj)
-      } else {
-        updateSelectedMesh()
-      }
-    })
 
     // Geometry loading buttons form modal dialogs
     $('#createCylinder').click(() => {
