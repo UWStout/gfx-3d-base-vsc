@@ -12,7 +12,7 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src/main.js')
     ],
-    vendor: ['jquery', 'three', 'bootstrap']
+    vendor: ['jquery', 'jqtree', 'three', 'bootstrap']
   },
   devtool: 'cheap-source-map',
   output: {
@@ -39,7 +39,8 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
-      Popper: ['popper.js', 'default']
+      Popper: ['popper.js', 'default'],
+      THREE: 'three'
     })
   ],
   module: {
