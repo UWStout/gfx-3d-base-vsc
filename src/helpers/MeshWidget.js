@@ -3,7 +3,10 @@ import * as THREE from 'three'
 import 'three/examples/js/controls/OrbitControls'
 import 'three/examples/js/controls/TrackballControls'
 
+import AnimatableMesh from './AnimatableMesh'
+
 import Interface from '../interface'
+import config from '../config'
 
 // Utility function for shadow-mapped lights
 import { makeShadowedLight } from '../utils'
@@ -310,6 +313,23 @@ class MeshWidget {
       // Add to scene copying the prior visibility
       this._scene.add(this._debugMesh)
       this._debugMesh.visible = dbgVisible
+    }
+  }
+
+  updateMeshFrame (frameNumber) {
+    if (frameNumber >= 0 && frameNumber <= config.MAX_FRAMES) {
+      this._updateToFrame = frameNumber
+      this.updateMesh()
+    }
+  }
+
+  updateMesh () {
+    if (this._solidMesh != null) {
+      this._solidMesh.traverse((object) => {
+        if (object instanceof AnimatableMesh) {
+          object.loadFrame(this._updateToFrame)
+        }
+      })
     }
   }
 

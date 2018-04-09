@@ -7,17 +7,15 @@ import $ from 'jquery'
 import 'jqtree/jqtree.css'
 import 'jqtree/tree.jquery'
 
-// Import ALLLLL the factories for use in the GUI
-import CubeFactory from './objects/CubeFactory'
-import CylinderFactory from './objects/CylinderFactory'
-import SphereFactory from './objects/SphereFactory'
-import SculptureFactory from './objects/SculptureFactory'
-import HumanoidFactory from './objects/HumanoidFactory'
-import ExtraCredit1Factory from './objects/ExtraCredit1Factory'
-import ExtraCredit2Factory from './objects/ExtraCredit2Factory'
+// Initialize the Bootstrap Slider plugin
+import 'bootstrap-slider/dist/css/bootstrap-slider.css'
+import 'bootstrap-slider/dist/bootstrap-slider'
 
-// Also import the OBJ loader for use in the GUI
-import ObjLoader from './objects/ObjLoader'
+// Global configuraiton values
+import config from './config.js'
+
+// Import the animatino factory for use in the GUI
+import AnimationFactory from './objects/AnimationFactory'
 
 let Interface = {
   initialize: () => {
@@ -34,86 +32,43 @@ let Interface = {
       }
     })
 
-    // The following file-input code (and the corresponding HTML) comes from:
-    // https://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3
-
-    // Setup a special event lister for all file inputs
-    $(document).on('change', ':file', function () {
-      let input = $(this)
-      let numFiles = input.get(0).files ? input.get(0).files.length : 1
-      let label = input.val().replace(/\\/g, '/').replace(/.*\//, '')
-      input.trigger('fileselect', [numFiles, label])
+    // Build lists of tick marks and labels
+    let ticksArray = [0]
+    for (let tickMark = config.FRAME_MARKS; tickMark < config.MAX_FRAMES; tickMark += config.FRAME_MARKS) {
+      ticksArray.push(tickMark)
+    }
+    ticksArray.push(config.MAX_FRAMES)
+    
+    // Initialize the frame slider
+    Interface.frameSlider = $('#frameSlider').slider({
+      min: 0, max: config.MAX_FRAMES, value: 0, ticks: ticksArray
     })
 
-    // Make all file buttons fill their paired text element
-    $(':File').on('fileselect', function (event, numFiles, label) {
-      // Update the text field to show what was selected
-      var input = $(this).parents('.input-group').find(':text')
-      var log = numFiles > 1 ? numFiles + ' files selected' : label
-      if (input.length) {
-        input.val(log)
-      } else if (log) {
-        alert(log)
-      }
-    })
-    // End borrowed file-input code
-
-    // Geometry loading buttons form modal dialogs
-    $('#createCylinder').click(() => {
-      Interface.cylinderFactory.slices = parseInt($('#cylinderSlices').val())
-      let mesh = Interface.cylinderFactory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-    })
-
-    $('#createSphere').click(() => {
-      Interface.sphereFactory.slices = parseInt($('#sphereSlices').val())
-      Interface.sphereFactory.stacks = parseInt($('#sphereStacks').val())
-      let mesh = Interface.sphereFactory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-    })
-
-    $('#createEC1').click(() => {
-      Interface.extraCredit1Factory.param1 = parseInt($('#ec1Param1').val())
-      Interface.extraCredit1Factory.param2 = parseInt($('#ec1Param2').val())
-      Interface.extraCredit1Factory.param3 = parseInt($('#ec1Param3').val())
-      let mesh = Interface.extraCredit1Factory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-    })
-
-    $('#createEC2').click(() => {
-      Interface.extraCredit2Factory.param1 = parseInt($('#ec1Param1').val())
-      Interface.extraCredit2Factory.param2 = parseInt($('#ec1Param2').val())
-      Interface.extraCredit2Factory.param3 = parseInt($('#ec1Param3').val())
-      let mesh = Interface.extraCredit2Factory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-    })
-
-    $('#objLoadButton').click(() => {
-      ObjLoader.loadAndAddOBJ($('#objFile')[0].files[0])
+    // Whenever frame slider value changes, request an update
+    Interface.frameSlider.slider('on', 'change', () => {
+      Interface.widget.updateMeshFrame(Interface.frameSlider.slider('getValue'))
+      updateCurrentlySelectedMesh()
     })
 
     // Reset the current view
-    $('#resetViewButton').click(() => {
-      Interface.widget.resetView()
-    })
+    $('#resetViewButton').click(() => { Interface.widget.resetView() })
 
-    // Re-calculate normals
-    $('#smoothNormals').click(() => {
-      Interface.widget.smoothNormals()
-    })
+    // Start/stop the animaiton
+    $('#playPauseButton').click(playPauseEvent)
 
-    $('#faceNormals').click(() => {
-      Interface.widget.computePerFaceNormals()
-    })
+    // Set a keyframe
+    $('#setKeyframeButton').click(setKeyFrameEvent)
 
-    // Load a shape of some type
-    $('#shapeLoad').change(handleLoadShape)
-
-    // Respond to render mode changes
-    $('#renderingMode').change(handleRenderModeChange)
+    // Load animation of some type
+    $('#animLoad').change(handleLoadAnimation)
 
     // Update the transformation of the currently selected mesh
-    $('.shape-trans-control').on('input', updateShapeTransformation)
+    $('.shape-trans-control').on('input', () => {
+      $('#setKeyframeButton').removeClass('btn-success')
+      $('#setKeyframeButton').addClass('btn-danger')
+      updateShapeTransformation()
+    })
+    $('.shape-trans-control').prop('disabled', true)
   }
 }
 
@@ -121,13 +76,7 @@ let Interface = {
 Interface.widget = null
 
 // Factories used by the GUI
-Interface.cubeFactory = new CubeFactory()
-Interface.cylinderFactory = new CylinderFactory()
-Interface.sphereFactory = new SphereFactory()
-Interface.sculptureFactory = new SculptureFactory()
-Interface.humanoidFactory = new HumanoidFactory()
-Interface.extraCredit1Factory = new ExtraCredit1Factory()
-Interface.extraCredit2Factory = new ExtraCredit2Factory()
+Interface.animFactory = new AnimationFactory()
 
 // Code for syncronizing the current scene graph with the GUI tree widget
 Interface.meshNodeCount = 0
@@ -141,13 +90,6 @@ Interface.syncMeshTreeWithGeometry = () => {
 
 // Expose the Interface object for use in other modules
 export default Interface
-
-// Set OBJ Loader event handler
-ObjLoader.onGeometryReady = (mesh) => {
-  let fileLabel = $('#objFile').parents('.input-group').find(':text').val()
-  mesh.name = fileLabel
-  Interface.widget.requestRebuild(mesh)
-}
 
 // Used to build the data structure used by the jQuery Tree widget
 function buildTreeData (meshNode) {
@@ -176,6 +118,86 @@ function buildTreeData (meshNode) {
 // Place the data into the jQuery tree widget
 function updateMeshTreeWidget (newData) {
   $('#meshListTree').tree('loadData', newData)
+}
+
+function advanceFrameEvent () {
+  // Advance the frame wrapping around to zero
+  let curFrame = Interface.frameSlider.slider('getValue')
+
+  curFrame++
+  if (curFrame > Interface.frameSlider.slider('getAttribute', 'max')) {
+    curFrame = Interface.frameSlider.slider('getAttribute', 'min')
+  }
+
+  // Move slider triggering only the change event
+  Interface.frameSlider.slider('setValue', curFrame, false, true)
+}
+
+let animationPlaying = false
+let intervalID = -1
+function playPauseEvent () {
+  // Reverse 'animationPlaying' and adjust GUI and events
+  animationPlaying = !animationPlaying
+  if (animationPlaying) {
+    // Update the GUI widgets
+    $('#animLoad').prop('disabled', true)
+    $('#setKeyframeButton').prop('disabled', true)
+    Interface.frameSlider.slider('disable')
+    $('#playPauseButton').html('<span class="glyphicon glyphicon-pause"></span>')
+
+    // Create a new 'interval' to fire at the desired Frame Rate
+    intervalID = setInterval(advanceFrameEvent, 1000 / config.TARGET_FPS)
+  } else {
+    // Update the GUI widgets
+    $('#animLoad').prop('disabled', false)
+    $('#setKeyframeButton').prop('disabled', false)
+    Interface.frameSlider.slider('enable')
+    $('#playPauseButton').html('<span class="glyphicon glyphicon-play"></span>')
+
+    // Stop the 'interval' event
+    clearInterval(intervalID)
+
+    // Update the selected mesh one last time
+    updateCurrentlySelectedMesh()
+  }
+}
+
+function setKeyFrameEvent () {
+  // Retrieve the currently selected node
+  let meshNode = $('#meshListTree').tree('getSelectedNode')
+  if (meshNode && meshNode.meshObj) {
+    // Get the current framenumber
+    let frameNumber = Interface.frameSlider.slider('getValue')
+
+    // Set/Re-set/Delete key frame and syncronize the key frame button
+    if (meshNode.meshObj.frameIsKeyFrame(frameNumber)) {
+      if ($('#setKeyframeButton').hasClass('btn-danger')) {
+        // Update currently set keyframe by saving over it
+        meshNode.meshObj.saveKeyframe(frameNumber)
+        $('#setKeyframeButton').addClass('btn-success')
+        $('#setKeyframeButton').removeClass('btn-danger')
+      } else {
+        // Remove the currently set keyframe
+        meshNode.meshObj.removeKeyframe(frameNumber)
+        $('#setKeyframeButton').removeClass('btn-success')
+        $('#setKeyframeButton').removeClass('btn-danger')
+      }
+    } else {
+      // Clone the current transform and add as keyframe
+      meshNode.meshObj.saveKeyframe(frameNumber)
+      $('#setKeyframeButton').addClass('btn-success')
+      $('#setKeyframeButton').removeClass('btn-danger')
+    }
+    updateSelectedMesh(meshNode.meshObj)
+  }
+}
+
+function updateCurrentlySelectedMesh () {
+  // Get the currently selected node and update it
+  let meshNode = $('#meshListTree').tree('getSelectedNode')
+  if (meshNode && meshNode.meshObj) {
+    updateSelectedMesh(meshNode.meshObj)
+  }
 }
 
 // Update the GUI form values to match the mesh element that was just selected
@@ -240,41 +262,33 @@ function updateShapeTransformation (e) {
   }
 }
 
-// Respond when user selects a shape type from the drop-down menu
-function handleLoadShape () {
+// Respond when user selects an animation type from the drop-down menu
+function handleLoadAnimation () {
+  let mesh
+
   // Pick type based on index
-  var typeSelector = $('#shapeLoad')[0]
+  let typeSelector = $('#animLoad')[0]
   switch (typeSelector.selectedIndex) {
-    // Basic geometry
+    // Animations
     case 2:
-      let mesh = Interface.cubeFactory.generateMesh()
+      mesh = Interface.animFactory.generateWalk()
       Interface.widget.requestRebuild(mesh)
+      Interface.widget.updateMeshFrame(0)
+      Interface.frameSlider.slider('setValue', 0)
+      $('#setKeyframeButton').prop('disabled', true)
       break
 
-    case 3: $('#createCylinderModal').modal(); break
-    case 4: $('#createSphereModal').modal(); break
-
-    // Hierarchical geometry
-    case 6:
-      mesh = Interface.humanoidFactory.generateMesh()
+    case 3:
+      mesh = Interface.animFactory.generateOther()
       Interface.widget.requestRebuild(mesh)
+      Interface.widget.updateMeshFrame(0)
+      Interface.frameSlider.slider('setValue', 0)
+      $('#setKeyframeButton').prop('disabled', true)
       break
-
-    case 7:
-      mesh = Interface.sculptureFactory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-      break
-
-    // Extra credit geometry
-    case 9: $('#createEC1Modal').modal(); break
-    case 10: $('#createEC2Modal').modal(); break
-
-    // Loading of arbitrary geometry files
-    case 12: $('#objLoadModal').modal(); break
 
     // Selector indexes that are decorative
-    case 0: case 1: case 5: case 8: case 11:
-      // These cases deliberately left blank
+    case 0: case 1:
+      // This case deliberately left blank
       break
 
     // Should never happen (but you know, code can change)
@@ -283,52 +297,11 @@ function handleLoadShape () {
       break
   }
 
-  // Reset both selectors back to zero index
+  // Reset selector back to zero index
   typeSelector.selectedIndex = 0
-  $('#renderingMode')[0].selectedIndex = 0
-}
-
-// Respond when the user changes the current rendering mode
-function handleRenderModeChange () {
-  var modeSelector = $('#renderingMode')[0]
-  switch (modeSelector.selectedIndex) {
-    case 0:
-      Interface.widget.toggleSolid(true)
-      Interface.widget.toggleWireframe(false)
-      Interface.widget.toggleDebug(false)
-      break
-
-    case 1:
-      Interface.widget.toggleSolid(true)
-      Interface.widget.toggleWireframe(true)
-      Interface.widget.toggleDebug(false)
-      break
-
-    case 2:
-      Interface.widget.toggleSolid(false)
-      Interface.widget.toggleWireframe(true)
-      Interface.widget.toggleDebug(false)
-      break
-
-    case 4:
-      Interface.widget.toggleSolid(false)
-      Interface.widget.toggleWireframe(false)
-      Interface.widget.toggleDebug(true)
-      break
-
-    // Selector indexes that are decorative
-    case 3:
-      // This case deliberately left blank
-      break
-
-    // Should never happen (but see default case above)
-    default:
-      console.log('ERROR: Unexpected index in rendering mode selector')
-      break
-  }
 }
 
 // check that a value is defined or fall back to default
 function sanitizeValue (value, fallback) {
-  return ((typeof value !== 'undefined') ? value : fallback)
+  return (value || fallback)
 }

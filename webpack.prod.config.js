@@ -12,7 +12,7 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src/main.js')
     ],
-    vendor: ['jquery', 'jqtree', 'three', 'bootstrap']
+    vendor: ['jquery', 'jqtree', 'three', 'bootstrap', 'bootstrap-slider']
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -36,7 +36,7 @@ module.exports = {
     new BrowserSyncPlugin({
       host: process.env.IP || 'localhost',
       port: process.env.PORT || 3000,
-      files: ['index.html', 'index.css', 'src/*/*.js'],
+      files: ['index.html', 'index.css', 'src/**/*.js'],
       server: {
         baseDir: ['./', './dist']
       }

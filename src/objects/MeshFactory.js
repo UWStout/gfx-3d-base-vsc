@@ -4,12 +4,12 @@
 // Import the three.js library and components needed
 import * as THREE from 'three'
 
-// Import our custom Transform object to add to the Meshes
-import Transform from '../helpers/Transform'
+// Import our custom AnimatableMesh to wrap all meshes
+import AnimatableMesh from '../helpers/AnimatableMesh'
 
 /**
  * A base class providing essential functionality for converting
- * THREE.Geometry() and THREE.Mesh() objects to be used in outwards
+ * THREE.Geometry() and THREE.Mesh() objects to be used in our
  * MeshWidget rendering system. These objects must be properly
  * encapsulated and/or decorated before they will work correctly
  * with MeshWidget.
@@ -21,7 +21,6 @@ import Transform from '../helpers/Transform'
 class MeshFactory {
   constructor () {
     this._count = 0
-    this._name = ''
   }
 
   /**
@@ -40,7 +39,6 @@ class MeshFactory {
    * then configured and decorated with our own Transform object used to
    * construct and manage 3D transformations manually.
    * @virtual
-   * @return {THREE.Mesh} A decorated mesh structure for use with MeshWidget
    **/
   generateMesh () {
     // Build the geometry associated with this factory
@@ -52,20 +50,7 @@ class MeshFactory {
     geometry.elementsNeedUpdate = true
 
     // Construct the Three.js Mesh object
-    let mesh = new THREE.Mesh(geometry, MeshFactory.widget._solidMaterial)
-    mesh.name = this._name
-
-    // Add custom transform property
-    // @ts-ignore
-    mesh.transform = new Transform(mesh)
-    mesh.matrixAutoUpdate = false
-
-    // Setup shadows
-    mesh.castShadow = true
-    mesh.receiveShadow = true
-
-    // Return the complete mesh object
-    return mesh
+    return MeshFactory.wrapGeometryWithMesh(geometry, this._name)
   }
 }
 
@@ -75,25 +60,11 @@ class MeshFactory {
  * THREE.mesh for use with that meshWidget.
  * @param {THREE.Geometry} geometry Triangle mesh to be placed inside a THREE.Mesh object.
  * @param {string} name name to apply to this mesh (displayed in the GUI).
- * @return {THREE.Mesh} An new mesh object containing the geometry for use with MeshWidget.
+ * @return {AnimatableMesh} An new mesh object containing the geometry for use with MeshWidget.
  * @static
  **/
 MeshFactory.wrapGeometryWithMesh = (geometry, name) => {
-  var mesh = new THREE.Mesh(geometry, MeshFactory.widget._solidMaterial)
-  if (typeof name !== 'undefined' && name !== '') {
-    mesh.name = name
-  }
-
-  // Add custom transform property
-  // @ts-ignore
-  mesh.transform = new Transform(mesh)
-  mesh.matrixAutoUpdate = false
-
-  // Setup shadows
-  mesh.castShadow = true
-  mesh.receiveShadow = true
-
-  return mesh
+  return new AnimatableMesh(geometry, MeshFactory.widget._solidMaterial, name)
 }
 
 /**
