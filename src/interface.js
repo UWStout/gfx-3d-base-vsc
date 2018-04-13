@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // Import jQuery as the usual '$' variable
 import $ from 'jquery'
 
@@ -21,7 +19,8 @@ let Interface = {
   initialize: () => {
     // Initialize the tree widget
     $('#meshListTree').tree({
-      data: [], autoOpen: 0
+      data: [],
+      autoOpen: 0
     })
 
     $('#meshListTree').bind('tree.select', (event) => {
@@ -38,10 +37,13 @@ let Interface = {
       ticksArray.push(tickMark)
     }
     ticksArray.push(config.MAX_FRAMES)
-    
+
     // Initialize the frame slider
     Interface.frameSlider = $('#frameSlider').slider({
-      min: 0, max: config.MAX_FRAMES, value: 0, ticks: ticksArray
+      min: 0,
+      max: config.MAX_FRAMES,
+      value: 0,
+      ticks: ticksArray
     })
 
     // Whenever frame slider value changes, request an update
@@ -51,7 +53,9 @@ let Interface = {
     })
 
     // Reset the current view
-    $('#resetViewButton').click(() => { Interface.widget.resetView() })
+    $('#resetViewButton').click(() => {
+      Interface.widget.resetView()
+    })
 
     // Start/stop the animaiton
     $('#playPauseButton').click(playPauseEvent)
@@ -83,7 +87,7 @@ Interface.meshNodeCount = 0
 Interface.syncMeshTreeWithGeometry = () => {
   if (typeof Interface.widget._solidMesh !== 'undefined') {
     Interface.meshNodeCount = 0
-    var treeDataRoot = buildTreeData(Interface.widget._solidMesh)
+    let treeDataRoot = buildTreeData(Interface.widget._solidMesh)
     updateMeshTreeWidget([treeDataRoot])
   }
 }
@@ -92,9 +96,9 @@ Interface.syncMeshTreeWithGeometry = () => {
 export default Interface
 
 // Used to build the data structure used by the jQuery Tree widget
-function buildTreeData (meshNode) {
+function buildTreeData(meshNode) {
   // Build Data for this node
-  var dataNode = {
+  let dataNode = {
     name: (meshNode.name || meshNode.type + ' Node ' + (Interface.meshNodeCount++)),
     id: meshNode.uuid,
     meshObj: meshNode
@@ -104,7 +108,7 @@ function buildTreeData (meshNode) {
   if (meshNode.children && meshNode.children.length > 0) {
     dataNode.children = []
     meshNode.children.forEach((child, index) => {
-      var childDataNode = buildTreeData(child)
+      let childDataNode = buildTreeData(child)
       if (childDataNode != null) {
         dataNode.children.push(childDataNode)
       }
@@ -116,11 +120,11 @@ function buildTreeData (meshNode) {
 }
 
 // Place the data into the jQuery tree widget
-function updateMeshTreeWidget (newData) {
+function updateMeshTreeWidget(newData) {
   $('#meshListTree').tree('loadData', newData)
 }
 
-function advanceFrameEvent () {
+function advanceFrameEvent() {
   // Advance the frame wrapping around to zero
   let curFrame = Interface.frameSlider.slider('getValue')
 
@@ -135,7 +139,8 @@ function advanceFrameEvent () {
 
 let animationPlaying = false
 let intervalID = -1
-function playPauseEvent () {
+
+function playPauseEvent() {
   // Reverse 'animationPlaying' and adjust GUI and events
   animationPlaying = !animationPlaying
   if (animationPlaying) {
@@ -162,7 +167,7 @@ function playPauseEvent () {
   }
 }
 
-function setKeyFrameEvent () {
+function setKeyFrameEvent() {
   // Retrieve the currently selected node
   let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode && meshNode.meshObj) {
@@ -192,7 +197,7 @@ function setKeyFrameEvent () {
   }
 }
 
-function updateCurrentlySelectedMesh () {
+function updateCurrentlySelectedMesh() {
   // Get the currently selected node and update it
   let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode && meshNode.meshObj) {
@@ -201,61 +206,78 @@ function updateCurrentlySelectedMesh () {
 }
 
 // Update the GUI form values to match the mesh element that was just selected
-function updateSelectedMesh (meshObj) {
+function updateSelectedMesh(meshObj) {
+  // Default the key frame button to disabled
+  $('#setKeyframeButton').prop('disabled', true)
+
   if (meshObj) {
     // Copy transformation properties into the GUI
-    $('#xTranslate').val(sanitizeValue(meshObj.transform.position.x, 0))
-    $('#yTranslate').val(sanitizeValue(meshObj.transform.position.y, 0))
-    $('#zTranslate').val(sanitizeValue(meshObj.transform.position.z, 0))
+    $('#xTranslate').val(sanitizeValue(meshObj.transform._position.x, 0))
+    $('#yTranslate').val(sanitizeValue(meshObj.transform._position.y, 0))
+    $('#zTranslate').val(sanitizeValue(meshObj.transform._position.z, 0))
 
-    $('#xScale').val(sanitizeValue(meshObj.transform.scale.x, 1))
-    $('#yScale').val(sanitizeValue(meshObj.transform.scale.y, 1))
-    $('#zScale').val(sanitizeValue(meshObj.transform.scale.z, 1))
+    $('#xScale').val(sanitizeValue(meshObj.transform._scale.x, 1))
+    $('#yScale').val(sanitizeValue(meshObj.transform._scale.y, 1))
+    $('#zScale').val(sanitizeValue(meshObj.transform._scale.z, 1))
 
-    $('#xAngle').val(sanitizeValue(meshObj.transform.rotation.x / Math.PI * 180, 0))
-    $('#yAngle').val(sanitizeValue(meshObj.transform.rotation.y / Math.PI * 180, 0))
-    $('#zAngle').val(sanitizeValue(meshObj.transform.rotation.z / Math.PI * 180, 0))
+    $('#xAngle').val(sanitizeValue(meshObj.transform._rotation.x / Math.PI * 180, 0))
+    $('#yAngle').val(sanitizeValue(meshObj.transform._rotation.y / Math.PI * 180, 0))
+    $('#zAngle').val(sanitizeValue(meshObj.transform._rotation.z / Math.PI * 180, 0))
 
-    $('#xPivot').val(sanitizeValue(meshObj.transform.pivot.x, 0))
-    $('#yPivot').val(sanitizeValue(meshObj.transform.pivot.y, 0))
-    $('#zPivot').val(sanitizeValue(meshObj.transform.pivot.z, 0))
+    $('#xPivot').val(sanitizeValue(meshObj.transform._pivotPoint.x, 0))
+    $('#yPivot').val(sanitizeValue(meshObj.transform._pivotPoint.y, 0))
+    $('#zPivot').val(sanitizeValue(meshObj.transform._pivotPoint.z, 0))
+
+    // Update keyframe button
+    if (meshObj.frameIsKeyFrame(Interface.frameSlider.slider('getValue'))) {
+      $('#setKeyframeButton').addClass('btn-success')
+      $('#setKeyframeButton').removeClass('btn-danger')
+    } else {
+      $('#setKeyframeButton').removeClass('btn-success')
+      $('#setKeyframeButton').removeClass('btn-danger')
+    }
+
+    // Enable the set keyframe button
+    $('#setKeyframeButton').prop('disabled', false)
 
     // Enable the transformation controls
-    $('#transformSet').prop('disabled', false)
+    if (!animationPlaying) {
+      $('.shape-trans-control').prop('disabled', false)
+    }
   } else {
-    $('#transformSet').prop('disabled', true)
+    $('.shape-trans-control').prop('disabled', true)
   }
 }
 
 // Update the transformation on the shape to match the GUI
 // form values that were just edited.
-function updateShapeTransformation (e) {
-  var meshNode = $('#meshListTree').tree('getSelectedNode')
+function updateShapeTransformation(e) {
+  let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode) {
     let meshObj = meshNode.meshObj
 
     meshObj.transform.setPosition(
-      sanitizeValue($('#xTranslate').val(), meshObj.transform.position.x),
-      sanitizeValue($('#yTranslate').val(), meshObj.transform.position.y),
-      sanitizeValue($('#zTranslate').val(), meshObj.transform.position.z)
+      sanitizeValue(parseFloat($('#xTranslate').val()), meshObj.transform.position.x),
+      sanitizeValue(parseFloat($('#yTranslate').val()), meshObj.transform.position.y),
+      sanitizeValue(parseFloat($('#zTranslate').val()), meshObj.transform.position.z)
     )
 
     meshObj.transform.setScale(
-      sanitizeValue($('#xScale').val(), meshObj.transform.scale.x),
-      sanitizeValue($('#yScale').val(), meshObj.transform.scale.y),
-      sanitizeValue($('#zScale').val(), meshObj.transform.scale.z)
+      sanitizeValue(parseFloat($('#xScale').val()), meshObj.transform.scale.x),
+      sanitizeValue(parseFloat($('#yScale').val()), meshObj.transform.scale.y),
+      sanitizeValue(parseFloat($('#zScale').val()), meshObj.transform.scale.z)
     )
 
     meshObj.transform.setRotation(
-      sanitizeValue($('#xAngle').val() / 180 * Math.PI, meshObj.transform.rotation.x),
-      sanitizeValue($('#yAngle').val() / 180 * Math.PI, meshObj.transform.rotation.y),
-      sanitizeValue($('#zAngle').val() / 180 * Math.PI, meshObj.transform.rotation.z)
+      sanitizeValue(parseFloat($('#xAngle').val()) / 180 * Math.PI, meshObj.transform.rotation.x),
+      sanitizeValue(parseFloat($('#yAngle').val()) / 180 * Math.PI, meshObj.transform.rotation.y),
+      sanitizeValue(parseFloat($('#zAngle').val()) / 180 * Math.PI, meshObj.transform.rotation.z)
     )
 
     meshObj.transform.setPivot(
-      sanitizeValue($('#xPivot').val(), meshObj.transform.pivot.x),
-      sanitizeValue($('#yPivot').val(), meshObj.transform.pivot.y),
-      sanitizeValue($('#zPivot').val(), meshObj.transform.pivot.z)
+      sanitizeValue(parseFloat($('#xPivot').val()), meshObj.transform.pivot.x),
+      sanitizeValue(parseFloat($('#yPivot').val()), meshObj.transform.pivot.y),
+      sanitizeValue(parseFloat($('#zPivot').val()), meshObj.transform.pivot.z)
     )
 
     Interface.widget.syncronizeMeshes()
@@ -263,7 +285,7 @@ function updateShapeTransformation (e) {
 }
 
 // Respond when user selects an animation type from the drop-down menu
-function handleLoadAnimation () {
+function handleLoadAnimation() {
   let mesh
 
   // Pick type based on index
@@ -286,12 +308,13 @@ function handleLoadAnimation () {
       $('#setKeyframeButton').prop('disabled', true)
       break
 
-    // Selector indexes that are decorative
-    case 0: case 1:
+      // Selector indexes that are decorative
+    case 0:
+    case 1:
       // This case deliberately left blank
       break
 
-    // Should never happen (but you know, code can change)
+      // Should never happen (but you know, code can change)
     default:
       console.log('ERROR: Unexpected index in geometry type selector')
       break
@@ -302,6 +325,6 @@ function handleLoadAnimation () {
 }
 
 // check that a value is defined or fall back to default
-function sanitizeValue (value, fallback) {
+function sanitizeValue(value, fallback) {
   return (value || fallback)
 }
