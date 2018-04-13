@@ -1,3 +1,6 @@
+// Disable type-checking as it reports incorrect errors
+// @ts-nocheck
+
 // Import jQuery as the usual '$' variable
 import $ from 'jquery'
 
@@ -96,7 +99,7 @@ Interface.syncMeshTreeWithGeometry = () => {
 export default Interface
 
 // Used to build the data structure used by the jQuery Tree widget
-function buildTreeData(meshNode) {
+function buildTreeData (meshNode) {
   // Build Data for this node
   let dataNode = {
     name: (meshNode.name || meshNode.type + ' Node ' + (Interface.meshNodeCount++)),
@@ -120,11 +123,11 @@ function buildTreeData(meshNode) {
 }
 
 // Place the data into the jQuery tree widget
-function updateMeshTreeWidget(newData) {
+function updateMeshTreeWidget (newData) {
   $('#meshListTree').tree('loadData', newData)
 }
 
-function advanceFrameEvent() {
+function advanceFrameEvent () {
   // Advance the frame wrapping around to zero
   let curFrame = Interface.frameSlider.slider('getValue')
 
@@ -140,7 +143,7 @@ function advanceFrameEvent() {
 let animationPlaying = false
 let intervalID = -1
 
-function playPauseEvent() {
+function playPauseEvent () {
   // Reverse 'animationPlaying' and adjust GUI and events
   animationPlaying = !animationPlaying
   if (animationPlaying) {
@@ -167,7 +170,7 @@ function playPauseEvent() {
   }
 }
 
-function setKeyFrameEvent() {
+function setKeyFrameEvent () {
   // Retrieve the currently selected node
   let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode && meshNode.meshObj) {
@@ -197,7 +200,7 @@ function setKeyFrameEvent() {
   }
 }
 
-function updateCurrentlySelectedMesh() {
+function updateCurrentlySelectedMesh () {
   // Get the currently selected node and update it
   let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode && meshNode.meshObj) {
@@ -206,7 +209,7 @@ function updateCurrentlySelectedMesh() {
 }
 
 // Update the GUI form values to match the mesh element that was just selected
-function updateSelectedMesh(meshObj) {
+function updateSelectedMesh (meshObj) {
   // Default the key frame button to disabled
   $('#setKeyframeButton').prop('disabled', true)
 
@@ -251,7 +254,7 @@ function updateSelectedMesh(meshObj) {
 
 // Update the transformation on the shape to match the GUI
 // form values that were just edited.
-function updateShapeTransformation(e) {
+function updateShapeTransformation (e) {
   let meshNode = $('#meshListTree').tree('getSelectedNode')
   if (meshNode) {
     let meshObj = meshNode.meshObj
@@ -285,7 +288,7 @@ function updateShapeTransformation(e) {
 }
 
 // Respond when user selects an animation type from the drop-down menu
-function handleLoadAnimation() {
+function handleLoadAnimation () {
   let mesh
 
   // Pick type based on index
@@ -325,6 +328,6 @@ function handleLoadAnimation() {
 }
 
 // check that a value is defined or fall back to default
-function sanitizeValue(value, fallback) {
+function sanitizeValue (value, fallback) {
   return (value || fallback)
 }
