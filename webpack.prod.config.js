@@ -51,6 +51,7 @@ module.exports = {
   ],
   module: {
     rules: [
+      { test: require.resolve('three/examples/js/WebGL.js'), use: ['exports-loader?WEBGL'] },
       { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.(otf|eot|svg|ttf|woff|woff2)$/, use: ['url-loader?limit=8192'] }

@@ -9,9 +9,9 @@ import $ from 'jquery'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-// Import the three.js library's Detector
+// Import the three.js library's WebGL Detector
 // @ts-ignore
-import Detector from 'three/examples/js/Detector'
+import WebGL from 'three/examples/js/WebGL'
 
 // Import the stats object for FPS feedback
 import Stats from 'stats.js'
@@ -30,11 +30,10 @@ $(document).ready(() => {
   Interface.initialize()
 
   // Make sure WebGL is supported
-  if (!Detector.webgl) {
+  if (!WebGL.isWebGLAvailable()) {
     console.log('adding message')
-    Detector.addGetWebGLMessage({
-      parent: $('#GLWidget')[0]
-    })
+    let warning = WebGL.getWebGLErrorMessage()
+    $('#GLWidget')[0].append(warning)
     return
   }
 

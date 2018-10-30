@@ -70,8 +70,6 @@ class MeshWidget {
     this._renderer.gammaOutput = true
 
     this._renderer.shadowMap.enabled = true
-    this._renderer.shadowMap.renderReverseSided = true
-    this._renderer.shadowMap.renderSingleSided = false
     this._renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
     // Append the renderer canvas to the scene
