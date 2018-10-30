@@ -70,7 +70,6 @@
           <option disabled>──────────</option>
           <option value="Cube">Load OBJ from File</option>
         </select>
-
         <br />
 
         <!-- The list of shapes in the scene -->
@@ -78,6 +77,13 @@
         <div class="scroll-container rounded-border">
           <div id="meshListTree"></div>
         </div>
+
+        <!-- Info about currently selected mesh -->
+        <div style="width:100%;">
+          <kbd>Verts: <span id="vertCount">n/a</span></kbd><br>
+          <kbd>Faces: <span id="faceCount">n/a</span></kbd>
+        </div>
+        <br />
 
         <!-- Controls for transformation -->
         <label>Transformation</label>

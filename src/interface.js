@@ -58,10 +58,11 @@ let Interface = {
     })
     // End borrowed file-input code
 
-    // Geometry loading buttons form modal dialogs
+    // Geometry loading buttons from modal dialogs
     $('#createCylinder').click(() => {
       Interface.cylinderFactory.slices = parseInt($('#cylinderSlices').val())
       let mesh = Interface.cylinderFactory.generateMesh()
+      describeMesh(mesh)
       Interface.widget.requestRebuild(mesh)
     })
 
@@ -69,6 +70,7 @@ let Interface = {
       Interface.sphereFactory.slices = parseInt($('#sphereSlices').val())
       Interface.sphereFactory.stacks = parseInt($('#sphereStacks').val())
       let mesh = Interface.sphereFactory.generateMesh()
+      describeMesh(mesh)
       Interface.widget.requestRebuild(mesh)
     })
 
@@ -146,7 +148,25 @@ export default Interface
 ObjLoader.onGeometryReady = (mesh) => {
   let fileLabel = $('#objFile').parents('.input-group').find(':text').val()
   mesh.name = fileLabel
+  describeMesh(mesh)
   Interface.widget.requestRebuild(mesh)
+}
+
+/**
+ * Describe the geometry in the given mesh as a string
+ * @param {THREE.Mesh} mesh The mesh to describe as a string
+ * @return {String} a string describing the geometry in the mesh
+ */
+function describeMesh (mesh) {
+  if (!mesh || !mesh.geometry) {
+    $('#vertCount').text('n/a')
+    $('#faceCount').text('n/a')
+  } else {
+    let vertsStr = mesh.geometry.vertices.length.toLocaleString()
+    let facesStr = mesh.geometry.faces.length.toLocaleString()
+    $('#vertCount').text(vertsStr)
+    $('#faceCount').text(facesStr)
+  }
 }
 
 // Used to build the data structure used by the jQuery Tree widget
@@ -180,7 +200,7 @@ function updateMeshTreeWidget (newData) {
 
 // Update the GUI form values to match the mesh element that was just selected
 function updateSelectedMesh (meshObj) {
-  if (meshObj) {
+  if (meshObj && meshObj.transform) {
     // Copy transformation properties into the GUI
     $('#xTranslate').val(sanitizeValue(meshObj.transform.position.x, 0))
     $('#yTranslate').val(sanitizeValue(meshObj.transform.position.y, 0))
@@ -203,6 +223,8 @@ function updateSelectedMesh (meshObj) {
   } else {
     $('#transformSet').prop('disabled', true)
   }
+
+  describeMesh(meshObj)
 }
 
 // Update the transformation on the shape to match the GUI
@@ -248,6 +270,7 @@ function handleLoadShape () {
     // Basic geometry
     case 2:
       let mesh = Interface.cubeFactory.generateMesh()
+      describeMesh(mesh)
       Interface.widget.requestRebuild(mesh)
       break
 
