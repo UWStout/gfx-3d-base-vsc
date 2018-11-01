@@ -11,7 +11,6 @@ import 'jqtree/tree.jquery'
 import CubeFactory from './objects/CubeFactory'
 import CylinderFactory from './objects/CylinderFactory'
 import SphereFactory from './objects/SphereFactory'
-import SculptureFactory from './objects/SculptureFactory'
 import HumanoidFactory from './objects/HumanoidFactory'
 import ExtraCredit1Factory from './objects/ExtraCredit1Factory'
 import ExtraCredit2Factory from './objects/ExtraCredit2Factory'
@@ -126,7 +125,6 @@ Interface.widget = null
 Interface.cubeFactory = new CubeFactory()
 Interface.cylinderFactory = new CylinderFactory()
 Interface.sphereFactory = new SphereFactory()
-Interface.sculptureFactory = new SculptureFactory()
 Interface.humanoidFactory = new HumanoidFactory()
 Interface.extraCredit1Factory = new ExtraCredit1Factory()
 Interface.extraCredit2Factory = new ExtraCredit2Factory()
@@ -283,20 +281,15 @@ function handleLoadShape () {
       Interface.widget.requestRebuild(mesh)
       break
 
-    case 7:
-      mesh = Interface.sculptureFactory.generateMesh()
-      Interface.widget.requestRebuild(mesh)
-      break
-
     // Extra credit geometry
-    case 9: $('#createEC1Modal').modal(); break
-    case 10: $('#createEC2Modal').modal(); break
+    case 8: $('#createEC1Modal').modal(); break
+    case 9: $('#createEC2Modal').modal(); break
 
     // Loading of arbitrary geometry files
-    case 12: $('#objLoadModal').modal(); break
+    case 11: $('#objLoadModal').modal(); break
 
     // Selector indexes that are decorative
-    case 0: case 1: case 5: case 8: case 11:
+    case 0: case 1: case 5: case 7:
       // These cases deliberately left blank
       break
 
