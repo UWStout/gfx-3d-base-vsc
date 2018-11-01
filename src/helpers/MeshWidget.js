@@ -199,6 +199,11 @@ class MeshWidget {
       // Try to syncronize GUI mesh tree
       Interface.syncMeshTreeWithGeometry()
     }
+
+    // re-sync rendering mode
+    this.toggleSolid(true)
+    this.toggleWireframe(false)
+    this.toggleDebug(false)
   }
 
   smoothNormals () {
