@@ -289,7 +289,7 @@ function handleLoadShape () {
     case 11: $('#objLoadModal').modal(); break
 
     // Selector indexes that are decorative
-    case 0: case 1: case 5: case 7:
+    case 0: case 1: case 5: case 7: case 10:
       // These cases deliberately left blank
       break
 
