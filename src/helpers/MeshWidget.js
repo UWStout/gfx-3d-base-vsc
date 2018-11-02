@@ -94,6 +94,7 @@ class MeshWidget {
           this._camera, this._renderer.domElement)
 
         this._controls.keys = { LEFT: 65, UP: 87, RIGHT: 68, BOTTOM: 83 }
+        this._controls.screenSpacePanning = true
 
         this._controls.rotateSpeed = 1.0
         this._controls.zoomSpeed = 0.5
