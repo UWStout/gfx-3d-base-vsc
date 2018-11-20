@@ -4,6 +4,7 @@
 // Import the three.js library and components needed
 import * as THREE from 'three'
 
+import AnimatableMesh from '../helpers/AnimatableMesh'
 // Import our custom Transform object to add to the Meshes
 import Transform from '../helpers/Transform'
 
@@ -67,88 +68,76 @@ class MeshFactory {
     // Return the complete mesh object
     return mesh
   }
-}
 
-/**
- * Encapsulate a basic THREE.Geometry object with a mesh combined with
- * the solidMaterial from our mesh widget. Also decorate the resulting
- * THREE.mesh for use with that meshWidget.
- * @param {THREE.Geometry} geometry Triangle mesh to be placed inside a THREE.Mesh object.
- * @param {string} name name to apply to this mesh (displayed in the GUI).
- * @return {THREE.Mesh} An new mesh object containing the geometry for use with MeshWidget.
- * @static
- **/
-MeshFactory.wrapGeometryWithMesh = (geometry, name) => {
-  var mesh = new THREE.Mesh(geometry, MeshFactory.widget._solidMaterial)
-  if (typeof name !== 'undefined' && name !== '') {
-    mesh.name = name
+  /**
+   * Encapsulate a basic THREE.Geometry object with a mesh combined with
+   * the solidMaterial from our mesh widget. Also decorate the resulting
+   * THREE.mesh for use with that meshWidget.
+   * @param {THREE.Geometry} geometry Triangle mesh to be placed inside a THREE.Mesh object.
+   * @param {string} name name to apply to this mesh (displayed in the GUI).
+   * @return {AnimatableMesh} An new mesh object containing the geometry for use with MeshWidget
+   *    and functionality to set keyframes.
+   * @static
+   **/
+  static wrapGeometryWithMesh (geometry, name) {
+    let mesh = new AnimatableMesh(geometry, MeshFactory.widget._solidMaterial, name)
+    return mesh
   }
 
-  // Add custom transform property
-  // @ts-ignore
-  mesh.transform = new Transform(mesh)
-  mesh.matrixAutoUpdate = false
-
-  // Setup shadows
-  mesh.castShadow = true
-  mesh.receiveShadow = true
-
-  return mesh
-}
-
-/**
- * Create an EMPTY THREE.Mesh object for use with the meshWidget. It has
- * NO geometry but can be used for transformation in the scene graph.
- * @param {string} name name to apply to this mesh (displayed in the GUI).
- * @return {THREE.Mesh} An empty mesh object ready for use with MeshWidget.
- * @static
- **/
-MeshFactory.generateEmptyNode = (name) => {
-  return MeshFactory.wrapGeometryWithMesh(new THREE.Geometry(), name)
-}
-
-/**
- * Insert a new empty node between the given mesn and its children and
- * make that mesh a child of this new empty node. The scale will be left
- * on the mesh but all other transformation properties are removed and
- * applied to the empty node so they will still affect the children.
- * @param {THREE.Mesh} mesh Mesh with scaling you want to isolate.
- * @return {THREE.Mesh} a new empty node with the given mesh as its child.
- * @static
- **/
-MeshFactory.isolateScale = (mesh) => {
-  // Generate a new node for isolation of scale
-  let isolater = MeshFactory.generateEmptyNode(mesh.name)
-  mesh.name = `${mesh.name} Geom`
-
-  // Is the mesh being isolated already part of the scene hierarchy
-  if (mesh.parent !== null) {
-    // Remove the mesh from the parent's list of children
-    let oldParent = mesh.parent
-    oldParent.remove(mesh)
-
-    // Insert the newParent into the space spot
-    oldParent.add(isolater)
+  /**
+   * Create an EMPTY THREE.Mesh object for use with the meshWidget. It has
+   * NO geometry but can be used for transformation in the scene graph.
+   * @param {string} name name to apply to this mesh (displayed in the GUI).
+   * @return {THREE.Mesh} An empty mesh object ready for use with MeshWidget.
+   * @static
+   **/
+  static generateEmptyNode (name) {
+    return MeshFactory.wrapGeometryWithMesh(new THREE.Geometry(), name)
   }
 
-  // Move the mesh into a child of the isolation node
-  isolater.add(mesh)
+  /**
+   * Insert a new empty node between the given mesn and its children and
+   * make that mesh a child of this new empty node. The scale will be left
+   * on the mesh but all other transformation properties are removed and
+   * applied to the empty node so they will still affect the children.
+   * @param {THREE.Mesh} mesh Mesh with scaling you want to isolate.
+   * @return {THREE.Mesh} a new empty node with the given mesh as its child.
+   * @static
+   **/
+  static isolateScale (mesh) {
+    // Generate a new node for isolation of scale
+    let isolater = MeshFactory.generateEmptyNode(mesh.name)
+    mesh.name = `${mesh.name} Geom`
 
-  // Manually copy out the translation and rotation from the old mesh
-  let translate = mesh.transform.position
-  let rotate = mesh.transform.rotation
-  let pivot = mesh.transform.pivot
+    // Is the mesh being isolated already part of the scene hierarchy
+    if (mesh.parent !== null) {
+      // Remove the mesh from the parent's list of children
+      let oldParent = mesh.parent
+      oldParent.remove(mesh)
 
-  isolater.transform.setPosition(translate.x, translate.y, translate.z)
-  isolater.transform.setRotation(rotate.x, rotate.y, rotate.z)
-  isolater.transform.setPivot(pivot.x, pivot.y, pivot.z)
+      // Insert the newParent into the space spot
+      oldParent.add(isolater)
+    }
 
-  // Clear these values on the old mesh
-  mesh.transform.setPosition(0, 0, 0)
-  mesh.transform.setRotation(0, 0, 0)
-  mesh.transform.setPivot(0, 0, 0)
+    // Move the mesh into a child of the isolation node
+    isolater.add(mesh)
 
-  return isolater
+    // Manually copy out the translation and rotation from the old mesh
+    let translate = mesh.transform.position
+    let rotate = mesh.transform.rotation
+    let pivot = mesh.transform.pivot
+
+    isolater.transform.setPosition(translate.x, translate.y, translate.z)
+    isolater.transform.setRotation(rotate.x, rotate.y, rotate.z)
+    isolater.transform.setPivot(pivot.x, pivot.y, pivot.z)
+
+    // Clear these values on the old mesh
+    mesh.transform.setPosition(0, 0, 0)
+    mesh.transform.setRotation(0, 0, 0)
+    mesh.transform.setPivot(0, 0, 0)
+
+    return isolater
+  }
 }
 
 // Reference to the MeshWidget that will use this factory.

@@ -7,6 +7,9 @@ import * as THREE from 'three'
 // Parent class
 import MeshFactory from './MeshFactory'
 
+// TODO: Copy in your code from project 3
+// Note: if you do not use this object in your humanoid you may skip this step.
+
 /**
  * A class to build some other procedural geometry for use with Three.js.
  * Can be implemented for extra credit. It is setup to accept up to three
@@ -67,7 +70,7 @@ class ExtraCredit1Factory extends MeshFactory {
    **/
   makeObjectGeometry () {
     // A fresh, empty Geometry object that will hold the mesh geometry
-    var ec1Geom = new THREE.Geometry()
+    let ec1Geom = new THREE.Geometry()
 
     // Return finished geometry
     return ec1Geom

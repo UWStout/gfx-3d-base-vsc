@@ -12,7 +12,7 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src/main.js')
     ],
-    vendor: ['jquery', 'jqtree', 'three', 'bootstrap']
+    vendor: ['jquery', 'jqtree', 'three', 'bootstrap', 'bootstrap-slider']
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

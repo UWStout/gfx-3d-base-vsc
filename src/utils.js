@@ -3,12 +3,12 @@ import * as THREE from 'three'
 
 // build a new Directional Light that supports shadow maps
 export function makeShadowedLight (x, y, z, color, intensity) {
-  var directionalLight = new THREE.DirectionalLight(color, intensity)
+  let directionalLight = new THREE.DirectionalLight(color, intensity)
   directionalLight.position.set(x, y, z)
   directionalLight.castShadow = true
 
   // Setup the shadow map frustum
-  var d = 4.0
+  let d = 4.0
   directionalLight.shadow.camera.left = -d
   directionalLight.shadow.camera.right = d
   directionalLight.shadow.camera.top = d

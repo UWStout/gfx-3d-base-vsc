@@ -40,14 +40,10 @@ class CylinderFactory extends MeshFactory {
    **/
   makeObjectGeometry () {
     // A fresh, empty Geometry object that will hold the mesh geometry
-    var cylGeom = new THREE.Geometry()
+    let cylGeom = new THREE.Geometry()
 
-    // TODO: Create a unit cylinder using this._slices to sample the circular dimension.
-    //   - Base circle should be at Y = -1 and have a radius of 1
-    //   - Top circle should be at Y = 1 and also have a radius of 1
-    //   - See CubeFactory for an example of how to use the Geometry object
-    //   - Your vertices must wind counter-clockwise and normals must point outwards
-    //   - You should have a single THREE.Geometry() for your cylinder that you return.
+    // TODO: Copy in your code from project 3
+    // Note: if you do not use cylinders in your humanoid you can skip this step
 
     // Return finished geometry
     return cylGeom

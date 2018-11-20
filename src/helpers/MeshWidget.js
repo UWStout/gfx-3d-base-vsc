@@ -3,7 +3,9 @@ import * as THREE from 'three'
 import 'three/examples/js/controls/OrbitControls'
 import 'three/examples/js/controls/TrackballControls'
 
+import AnimatableMesh from './AnimatableMesh'
 import Interface from '../interface'
+import config from '../config'
 
 // Utility function for shadow-mapped lights
 import { makeShadowedLight } from '../utils'
@@ -318,6 +320,23 @@ class MeshWidget {
     }
   }
 
+  updateMeshFrame (frameNumber) {
+    if (frameNumber >= 0 && frameNumber <= config.MAX_FRAMES) {
+      this._updateToFrame = frameNumber
+      this.updateMesh()
+    }
+  }
+
+  updateMesh () {
+    if (this._solidMesh != null) {
+      this._solidMesh.traverse((object) => {
+        if (object instanceof AnimatableMesh) {
+          object.loadFrame(this._updateToFrame)
+        }
+      })
+    }
+  }
+
   requestResize () {
     this._resizeRequested = true
   }
@@ -357,7 +376,7 @@ class MeshWidget {
       // Animate rotating camera
       if (this._rotateCam) {
         this._rotTimer += 15
-        var angle = this._rotTimer * 0.0005
+        let angle = this._rotTimer * 0.0005
 
         // Move camera
         this._camera.position.x = Math.sin(angle) * this._camX

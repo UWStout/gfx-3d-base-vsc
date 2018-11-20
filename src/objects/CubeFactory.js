@@ -28,7 +28,7 @@ class CubeFactory extends MeshFactory {
    **/
   makeObjectGeometry () {
     // Make an empty geometry structure
-    var cubeGeom = new THREE.Geometry()
+    let cubeGeom = new THREE.Geometry()
 
     // Add the eight vertices
     cubeGeom.vertices.push(
@@ -46,7 +46,7 @@ class CubeFactory extends MeshFactory {
     )
 
     // Make the six face normals in an array
-    var normals = [
+    let normals = [
       new THREE.Vector3(1.0, 0.0, 0.0), // 0
       new THREE.Vector3(-1.0, 0.0, 0.0), // 1
 
