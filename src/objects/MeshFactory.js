@@ -53,20 +53,7 @@ class MeshFactory {
     geometry.elementsNeedUpdate = true
 
     // Construct the Three.js Mesh object
-    let mesh = new THREE.Mesh(geometry, MeshFactory.widget._solidMaterial)
-    mesh.name = this._name
-
-    // Add custom transform property
-    // @ts-ignore
-    mesh.transform = new Transform(mesh)
-    mesh.matrixAutoUpdate = false
-
-    // Setup shadows
-    mesh.castShadow = true
-    mesh.receiveShadow = true
-
-    // Return the complete mesh object
-    return mesh
+    return MeshFactory.wrapGeometryWithMesh(geometry, this._name)
   }
 
   /**
